@@ -6,5 +6,6 @@ import (
 )
 
 func main() {
+	logx.Logger.Fatal("test fatal error")
 	logx.Logger.Info("hello world")
 }

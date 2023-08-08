@@ -1,0 +1,16 @@
+syntax = "proto3";
+option go_package = "github.com/jacci-ch/sdp-xlib/examples/grpcx/pb";
+
+package pb;
+
+message Request {
+  string name = 1;
+}
+
+message Response {
+  string reply = 1;
+}
+
+service Test {
+  rpc greet(Request) returns (Response) {}
+}

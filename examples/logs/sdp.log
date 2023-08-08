@@ -1,30 +1,9 @@
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 11:16:44.527"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 11:16:44.527"}
-{"file":"main.go","func":"main.main()","level":"info","msg":"hello world","time":"2023-08-08 11:16:44.527"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 12:21:44.183"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 12:21:44.183"}
-{"file":"etcd.go","func":"etcdx.init.0()","level":"error","msg":"etcdx: endpoints not configured","time":"2023-08-08 12:21:44.183"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 12:21:53.522"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 12:21:53.523"}
-{"file":"etcd.go","func":"etcdx.init.0()","level":"error","msg":"etcdx: endpoints not configured","time":"2023-08-08 12:23:03.768"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 12:23:04.813"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 12:23:04.814"}
-{"file":"etcd.go","func":"etcdx.init.0()","level":"error","msg":"etcdx: ParseAddr(\"vm-etcd-single\"): unable to parse IP","time":"2023-08-08 12:23:24.041"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 12:23:25.002"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 12:23:25.003"}
-{"file":"etcd.go","func":"etcdx.init.0()","level":"error","msg":"etcdx: ParseAddr(\"vm-etcd-single\"): unable to parse IP","time":"2023-08-08 12:33:48.665"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 13:09:31.807"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 13:09:31.808"}
-{"file":"etcd.go","func":"etcdx.init.0()","level":"error","msg":"etcdx: invalid read timeout: empty value","time":"2023-08-08 13:11:00.529"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 13:11:02.192"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 13:11:02.192"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 13:25:58.130"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 13:25:58.130"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 13:28:08.024"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 13:28:08.024"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 13:29:55.009"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 13:29:55.009"}
-{"file":"etcd.go","func":"etcdx.init.0()","level":"info","msg":"etcdx: endpoints is vm-etcd-single:2379","time":"2023-08-08 13:29:55.010"}
-{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 16:09:08.077"}
-{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 16:09:08.077"}
-{"file":"main.go","func":"main.main()","level":"info","msg":"hello world","time":"2023-08-08 16:09:08.077"}
+{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 17:18:49.008"}
+{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 17:18:49.008"}
+{"file":"etcd.go","func":"etcdx.init.0()","level":"info","msg":"etcdx: endpoints is vm-etcd-single:2379","time":"2023-08-08 17:18:49.009"}
+{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 17:19:42.078"}
+{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 17:19:42.078"}
+{"file":"etcd.go","func":"etcdx.init.0()","level":"info","msg":"etcdx: endpoints is vm-etcd-single:2379","time":"2023-08-08 17:19:42.079"}
+{"file":"cfg_apply.go","func":"logx.ApplyConfigs()","level":"info","msg":"logx: output log message to ./examples/logs","time":"2023-08-08 17:20:14.744"}
+{"file":"loader.go","func":"cfgx.init.0()","level":"info","msg":"cfgx: use configuration file: ./conf/sdp.conf","time":"2023-08-08 17:20:14.744"}
+{"file":"etcd.go","func":"etcdx.init.0()","level":"info","msg":"etcdx: endpoints is vm-etcd-single:2379","time":"2023-08-08 17:20:14.745"}

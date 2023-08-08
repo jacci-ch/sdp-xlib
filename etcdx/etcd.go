@@ -36,15 +36,14 @@ func GenEtcdClient(cfg *Config) (*etcd.Client, error) {
 func init() {
 	cfg, err := LoadConfigs()
 	if err != nil {
-		logx.Logger.Error(err)
-		panic(err)
+		logx.Logger.Fatal(err)
 		return
 	}
 
 	client, err := GenEtcdClient(cfg)
 	if err != nil {
-		logx.Logger.Error(err)
-		panic(err)
+		logx.Logger.Fatal(err)
+		return
 	}
 
 	// Atomic set the etcd client pointer
