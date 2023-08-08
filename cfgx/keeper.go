@@ -7,7 +7,7 @@ const (
 )
 
 var (
-	gValueKeeper = newValueKeeper()
+	gValueKeeper ValueKeeper
 )
 
 type ValueKeeper map[string]map[string]*cfgv.Value

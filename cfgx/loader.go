@@ -49,14 +49,16 @@ func loadCfgFromFile() error {
 		return errors.New("cfgx: " + err.Error())
 	}
 
+	valueKeeper := newValueKeeper()
 	for _, section := range iniFile.Sections() {
 		values := make(map[string]*cfgv.Value)
 		for _, key := range section.Keys() {
 			values[key.Name()] = cfgv.Value(key.Value()).Addr()
 		}
-		gValueKeeper[section.Name()] = values
+		valueKeeper[section.Name()] = values
 	}
 
+	gValueKeeper = valueKeeper
 	return nil
 }
 

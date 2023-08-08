@@ -111,7 +111,8 @@ func ApplyAllConfigs(cfg *Config) error {
 	}
 
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&Logger)), unsafe.Pointer(logger))
-	currCfg = cfg
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&currCfg)), unsafe.Pointer(cfg))
+
 	return nil
 }
 

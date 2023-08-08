@@ -48,7 +48,7 @@ func init() {
 
 	// Atomic set the etcd client pointer
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&gClient)), unsafe.Pointer(client))
-	currCfg = cfg
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&currCfg)), unsafe.Pointer(cfg))
 
 	logx.Logger.Infof("etcdx: endpoints is %v", strings.Join(cfg.Endpoints, ","))
 }
