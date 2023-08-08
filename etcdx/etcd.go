@@ -37,6 +37,7 @@ func init() {
 	cfg, err := LoadConfigs()
 	if err != nil {
 		logx.Logger.Error(err)
+		panic(err)
 		return
 	}
 
