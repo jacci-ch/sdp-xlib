@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+const (
+	Separator = ";"
+)
+
 type Resolver struct {
 	target resolver.Target
 	cc     resolver.ClientConn
@@ -15,7 +19,7 @@ type Resolver struct {
 func (r *Resolver) start() (resolver.Resolver, error) {
 	var addrs []resolver.Address
 
-	if list := strings.Split(r.target.URL.Host, ","); len(list) > 0 {
+	if list := strings.Split(r.target.URL.Host, Separator); len(list) > 0 {
 		for _, addr := range list {
 			addrs = append(addrs, resolver.Address{Addr: addr})
 		}

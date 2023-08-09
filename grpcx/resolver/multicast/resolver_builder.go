@@ -6,13 +6,13 @@ import (
 )
 
 const (
-	ResolverScheme = "multicast"
+	Scheme = "multicast"
 )
 
 type ResolverBuilder struct{}
 
 func (t *ResolverBuilder) Scheme() string {
-	return ResolverScheme
+	return Scheme
 }
 
 func (t *ResolverBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
