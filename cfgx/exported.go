@@ -1,5 +1,9 @@
 package cfgx
 
+var (
+	Def = &defaultValueKeeper{}
+)
+
 func ToInt64(name, key string, dst *int64, defaultValue int64) error {
 	return gValueKeeper.ToInt64(name, key, dst, defaultValue)
 }

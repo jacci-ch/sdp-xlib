@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/jacci-ch/sdp-xlib/examples/grpcx/pb"
+	"github.com/jacci-ch/sdp-xlib/grpcx"
 	"google.golang.org/grpc"
-	"net"
 	"sync"
 )
 
 func startServer(addr string) {
-	listener, err := net.Listen("tcp", addr)
+	listener, err := grpcx.GetListener()
 	if err != nil {
 		fmt.Printf("err: %v", err)
 		panic(err)
@@ -23,13 +23,14 @@ func startServer(addr string) {
 		fmt.Printf("err: %v", err)
 		panic(err)
 	}
-
 }
 
 func main() {
 	var group sync.WaitGroup
 
-	for _, addr := range []string{":9527", ":9528", ":9529"} {
+	//addrs := []string{":9527", ":9528", ":9529"}
+	addrs := []string{":9527"}
+	for _, addr := range addrs {
 		group.Add(1)
 		go func(addr string) {
 			startServer(addr)

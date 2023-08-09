@@ -15,6 +15,8 @@ func CallerPrettifyFuncForJSON(frame *runtime.Frame) (string, string) {
 	return filepath.Base(frame.Function) + "()", filepath.Base(frame.File)
 }
 
+// Logger
+// TODO: Write a logrus hook to parse the caller frame so we can use logx as: logx.Info(...)
 var Logger *logrus.Logger
 
 func init() {

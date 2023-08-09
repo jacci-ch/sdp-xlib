@@ -77,6 +77,8 @@ func GenLoggerWithConfig(cfg *Config) (*logrus.Logger, error) {
 			TimestampFormat:  cfg.FormatterTimestampFormat,
 			CallerPrettyfier: CallerPrettifyFuncForJSON,
 		})
+	default:
+		return nil, errors.New("logx: invalid configuration")
 	}
 
 	var writer io.Writer
