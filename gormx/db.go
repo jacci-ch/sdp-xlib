@@ -1,3 +1,7 @@
+// Copyright 2023 - now The SDP Authors. All rights reserved.
+// Use of this source code is governed by a Apache 2.0 style
+// license that can be found in the LICENSE file.
+
 package gormx
 
 import (
@@ -13,7 +17,10 @@ var (
 	DB *gorm.DB
 )
 
-func GenGormDB(cfg *Config) (*gorm.DB, error) {
+// NewDB
+//
+// Open and generate a new gorm.DB with given configuration.
+func NewDB(cfg *Config) (*gorm.DB, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
@@ -26,6 +33,10 @@ func GenGormDB(cfg *Config) (*gorm.DB, error) {
 	return db, err
 }
 
+// init
+//
+// Load configurations and generates a new gorm.DB object. This
+// function store the new gorm.DB object into DB global value.
 func init() {
 	cfg, err := LoadConfigs()
 	if err != nil {
@@ -33,7 +44,7 @@ func init() {
 		return
 	}
 
-	db, err := GenGormDB(cfg)
+	db, err := NewDB(cfg)
 	if err != nil {
 		logx.Logger.Fatal(err)
 	}
@@ -43,7 +54,7 @@ func init() {
 	}
 
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&DB)), unsafe.Pointer(db))
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&currCfg)), unsafe.Pointer(cfg))
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&Cfg)), unsafe.Pointer(cfg))
 
 	logx.Logger.Info("gormx: database dsn: ", cfg.Dsn)
 }

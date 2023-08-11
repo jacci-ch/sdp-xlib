@@ -2,13 +2,6 @@
 // Use of this source code is governed by a Apache 2.0 style
 // license that can be found in the LICENSE file.
 
-package etcdx
+// A builder tool for logrus.Logger.
 
-// KV
-//
-// A struct like etcd.KV struct but store the key/value
-// in string type instead of []byte.
-type KV struct {
-	Key   string
-	Value string
-}
+package logx

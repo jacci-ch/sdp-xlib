@@ -1,3 +1,7 @@
+// Copyright 2023 - now The SDP Authors. All rights reserved.
+// Use of this source code is governed by a Apache 2.0 style
+// license that can be found in the LICENSE file.
+
 package etcdx
 
 import (
@@ -13,9 +17,10 @@ var (
 	gClient *etcd.Client
 )
 
-// GenEtcdClient
+// NewClient
+//
 // Generate a etcd client with given configuration.
-func GenEtcdClient(cfg *Config) (*etcd.Client, error) {
+func NewClient(cfg *Config) (*etcd.Client, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
@@ -33,6 +38,11 @@ func GenEtcdClient(cfg *Config) (*etcd.Client, error) {
 	return client, nil
 }
 
+// init
+//
+// Parses all configurations and generates a new etcd client with
+// the configurations. This function store the etc client object
+// in gClient value.
 func init() {
 	cfg, err := LoadConfigs()
 	if err != nil {
@@ -40,15 +50,15 @@ func init() {
 		return
 	}
 
-	client, err := GenEtcdClient(cfg)
+	client, err := NewClient(cfg)
 	if err != nil {
 		logx.Logger.Fatal(err)
 		return
 	}
 
-	// Atomic set the etcd client pointer
+	// Atomically set the etcd client pointer and current in use configuration.
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&gClient)), unsafe.Pointer(client))
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&currCfg)), unsafe.Pointer(cfg))
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&Cfg)), unsafe.Pointer(cfg))
 
-	logx.Logger.Infof("etcdx: endpoints is %v", strings.Join(cfg.Endpoints, ","))
+	logx.Logger.Infof("etcdx: connect to %v", strings.Join(cfg.Endpoints, ","))
 }

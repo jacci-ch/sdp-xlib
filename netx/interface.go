@@ -10,10 +10,11 @@ var (
 	ErrAddrNotFound = errors.New("netx: valid address not found")
 )
 
-// GetInterfaceByPrefixIn
-// Returns a list of network interface list which name has at least one
+// InterfacesWithPrefixIn
+//
+// Returns a list of network interfaces which name has at least one
 // of the prefix in the list.
-func GetInterfaceByPrefixIn(prefixes []string) ([]*net.Interface, error) {
+func InterfacesWithPrefixIn(prefixes []string) ([]*net.Interface, error) {
 	interfaces, err := net.Interfaces()
 	if err != nil {
 		return nil, errors.New("netx: " + err.Error())
@@ -29,8 +30,16 @@ func GetInterfaceByPrefixIn(prefixes []string) ([]*net.Interface, error) {
 	return result, nil
 }
 
-func GetFirstInterfaceAddr() (string, error) {
-	interfaces, err := GetInterfaceByPrefixIn([]string{"eth0", "en"})
+// FirstInterfaceAddr
+//
+// Returns the first non-virtual interfaces IP address. The prefixes:
+//
+//	eth - the classical linux
+//	en  - ens33 (centos 7+); en0 - mac OS X.
+//
+// This function use prefix match for local HW interfaces.
+func FirstInterfaceAddr() (string, error) {
+	interfaces, err := InterfacesWithPrefixIn([]string{"eth", "en"})
 	if err != nil {
 		return "", errors.New("netx: " + err.Error())
 	}
@@ -57,6 +66,7 @@ func GetFirstInterfaceAddr() (string, error) {
 		}
 	}
 
+	// No IPv4 is found, so we have to returns an IPv6 address.
 	if ipv6 != nil {
 		return ipv6.String(), nil
 	}

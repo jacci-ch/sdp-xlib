@@ -1,19 +1,31 @@
+// Copyright 2023 - now The SDP Authors. All rights reserved.
+// Use of this source code is governed by a Apache 2.0 style
+// license that can be found in the LICENSE file.
+
 package etcdx
 
 import (
 	"context"
+	"github.com/jacci-ch/sdp-xlib/jsonx"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
-func getWithContext(key string, opts ...etcd.OpOption) (*etcd.GetResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), currCfg.ReadTimeoutDuration)
+// getRsp
+//
+// Execute gClient.Get() with background context and returns
+// the response object.
+func getRsp(key string, opts ...etcd.OpOption) (*etcd.GetResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), Cfg.ReadTimeoutDuration)
 	defer cancel()
 
 	return gClient.Get(ctx, key, opts...)
 }
 
+// GetBytes
+//
+// Returns the value of given key in []byte type.
 func GetBytes(key string) ([]byte, error) {
-	rsp, err := getWithContext(key)
+	rsp, err := getRsp(key)
 	if err == nil && rsp.Count > 0 && len(rsp.Kvs) != 0 {
 		return rsp.Kvs[0].Value, nil
 	}
@@ -29,14 +41,26 @@ func Get(key string) (string, error) {
 	return string(bytes), nil
 }
 
+// GetAs
+//
+// Returns the value of given key in given type. This function use
+// jsonx.Unmarshal function to parse bytes into given i address.
 func GetAs(key string, i any) error {
-	return nil
+	bytes, err := GetBytes(key)
+	if err != nil {
+		return err
+	}
+
+	return jsonx.Unmarshal(bytes, i)
 }
 
 // GetKeys
-// Request for only keys with given prefix.
+//
+// Returns all keys with given prefix in etcd clusters. Caution:
+// a very short prefix can match a large mount of keys. Please use
+// this function carefully.
 func GetKeys(prefix string) ([]string, error) {
-	rsp, err := getWithContext(prefix, etcd.WithPrefix(), etcd.WithKeysOnly())
+	rsp, err := getRsp(prefix, etcd.WithPrefix(), etcd.WithKeysOnly())
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +73,11 @@ func GetKeys(prefix string) ([]string, error) {
 	return result, nil
 }
 
+// GetByPrefix
+//
+// Returns all KVs matches given prefix and returns an array.
 func GetByPrefix(prefix string) ([]*KV, error) {
-	rsp, err := getWithContext(prefix, etcd.WithPrefix())
+	rsp, err := getRsp(prefix, etcd.WithPrefix())
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +90,11 @@ func GetByPrefix(prefix string) ([]*KV, error) {
 	return result, nil
 }
 
+// GetByPrefixAsMap
+//
+// Returns all KVs matches given prefix and converts to a map[<key>]<value>.
 func GetByPrefixAsMap(prefix string) (map[string]string, error) {
-	rsp, err := getWithContext(prefix, etcd.WithPrefix())
+	rsp, err := getRsp(prefix, etcd.WithPrefix())
 	if err != nil {
 		return nil, err
 	}

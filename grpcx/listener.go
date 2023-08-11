@@ -1,32 +1,47 @@
+// Copyright 2023 - now The SDP Authors. All rights reserved.
+// Use of this source code is governed by a Apache 2.0 style
+// license that can be found in the LICENSE file.
+
 package grpcx
 
 import (
-	"fmt"
-	"github.com/jacci-ch/sdp-xlib/grpcx/errors"
-	"github.com/jacci-ch/sdp-xlib/logx"
+	"errors"
 	"net"
 )
 
-func NewListener(cfg *Config) (net.Listener, error) {
+// NewListenerWithCfg
+//
+// Create a listener with given configurations.
+func NewListenerWithCfg(cfg *Config) (net.Listener, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
-	addr := fmt.Sprintf("%v:%v", cfg.ListenAddr, cfg.ListenPort)
-
-	listener, err := net.Listen("tcp", addr)
+	listener, err := net.Listen("tcp", cfg.Endpoint())
 	if err != nil {
-		return nil, errors.Wrapper(err)
+		return nil, errors.New("grpcx: " + err.Error())
 	}
 
-	logx.Logger.Infof("grpcx: listen on: %v", addr)
 	return listener, nil
 }
 
-func GetListener() (net.Listener, error) {
-	if currCfg == nil {
-		return nil, errors.ErrNoConfig
+// NewListenerWithKeys
+//
+// Create a listener with given configuration keys. This function
+// loads all configurations with given keys to generate a Config
+// object and then calls to NewListenerWithCfg function.
+func NewListenerWithKeys(keys *ConfigKeys) (net.Listener, error) {
+	cfg, err := LoadConfigsWith(keys)
+	if err != nil {
+		return nil, err
 	}
 
-	return NewListener(currCfg)
+	return NewListenerWithCfg(cfg)
+}
+
+// NewListener
+//
+// Create a listener with default configurations.
+func NewListener() (net.Listener, error) {
+	return NewListenerWithCfg(Cfg)
 }

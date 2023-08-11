@@ -1,3 +1,7 @@
+// Copyright 2023 - now The SDP Authors. All rights reserved.
+// Use of this source code is governed by a Apache 2.0 style
+// license that can be found in the LICENSE file.
+
 package cfgx
 
 import (
@@ -9,7 +13,7 @@ import (
 )
 
 var (
-	CfgFilePaths = []string{
+	CfgFiles = []string{
 		"./sdp.conf",
 		"./conf/sdp.conf",
 		"./conf/sdp/sdp.conf",
@@ -27,8 +31,11 @@ var (
 	ErrNotFound = errors.New("cfgx: file not found")
 )
 
-func probeCfgFile() string {
-	for _, name := range CfgFilePaths {
+// ProbeCfgFile
+//
+// Detect the available configuration file in the hard-coded list.
+func ProbeCfgFile() string {
+	for _, name := range CfgFiles {
 		if osx.Exist(name) {
 			return name
 		}
@@ -37,8 +44,12 @@ func probeCfgFile() string {
 	return ""
 }
 
+// loadCfgFromFile
+//
+// Probe the configuration file and load all configuration
+// items into a value keeper object.
 func loadCfgFromFile() error {
-	name := probeCfgFile()
+	name := ProbeCfgFile()
 	if len(name) == 0 {
 		return ErrNotFound
 	}
@@ -49,7 +60,9 @@ func loadCfgFromFile() error {
 		return errors.New("cfgx: " + err.Error())
 	}
 
-	valueKeeper := newValueKeeper()
+	// Read all kv-pairs of all sections in the configuration
+	// file into a new value keeper.
+	valueKeeper := NewValueKeeper()
 	for _, section := range iniFile.Sections() {
 		values := make(map[string]*cfgv.Value)
 		for _, key := range section.Keys() {
@@ -62,14 +75,17 @@ func loadCfgFromFile() error {
 	return nil
 }
 
+// init
+//
+// Load configurations and apply logger configurations to logx.
+// To avoid the 'import
 func init() {
-	if err := loadCfgFromFile(); err == nil {
-		logx.ApplyConfigs(gValueKeeper)
-
-		logx.Logger.Infof("cfgx: use configuration file: %v", CfgFile)
-	} else if err == ErrNotFound {
-		return // All use default configurations.
-	} else {
-		panic(err)
+	err := loadCfgFromFile()
+	if err != nil {
+		logx.Logger.Fatal(err)
+		return
 	}
+
+	logx.ApplyConfigs(Def)
+	logx.Logger.Infof("cfgx: use configuration file: %v", CfgFile)
 }

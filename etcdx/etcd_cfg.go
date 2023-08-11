@@ -1,3 +1,7 @@
+// Copyright 2023 - now The SDP Authors. All rights reserved.
+// Use of this source code is governed by a Apache 2.0 style
+// license that can be found in the LICENSE file.
+
 package etcdx
 
 import (
@@ -9,8 +13,6 @@ import (
 )
 
 const (
-	KeyDefault = cfgx.Default
-
 	KeyEndpoints    = "server.etcd.endpoints"
 	KeyDialTimeout  = "server.etcd.dial.timeout"
 	KeyReadTimeout  = "server.etcd.read.timeout"
@@ -18,14 +20,13 @@ const (
 )
 
 var (
-	defCfg = &Config{
-		DialTimeout:  "30s",
-		ReadTimeout:  "30s",
-		WriteTimeout: "30s",
+	DefCfg = &Config{
+		DialTimeout:  "10s",
+		ReadTimeout:  "10s",
+		WriteTimeout: "10s",
 	}
 
-	// the current in use configurations.
-	currCfg *Config
+	Cfg *Config
 )
 
 type Config struct {
@@ -42,6 +43,7 @@ type Config struct {
 }
 
 // Validate
+//
 // Validates the configuration fields.
 func (c *Config) Validate() error {
 	if len(c.Endpoints) == 0 {
@@ -70,14 +72,15 @@ func (c *Config) Validate() error {
 }
 
 // LoadConfigs
-// Parses the configuration fields from cfgx module.
+//
+// Parses configurations from cfgx module.
 func LoadConfigs() (*Config, error) {
 	cfg := &Config{}
 
-	_ = cfgx.ToStrArray(KeyDefault, KeyEndpoints, &cfg.Endpoints, defCfg.Endpoints)
-	_ = cfgx.ToStr(KeyDefault, KeyDialTimeout, &cfg.DialTimeout, defCfg.DialTimeout)
-	_ = cfgx.ToStr(KeyDefault, KeyReadTimeout, &cfg.ReadTimeout, defCfg.ReadTimeout)
-	_ = cfgx.ToStr(KeyDefault, KeyWriteTimeout, &cfg.WriteTimeout, defCfg.WriteTimeout)
+	_ = cfgx.Def.ToStrArray(KeyEndpoints, &cfg.Endpoints, DefCfg.Endpoints)
+	_ = cfgx.Def.ToStr(KeyDialTimeout, &cfg.DialTimeout, DefCfg.DialTimeout)
+	_ = cfgx.Def.ToStr(KeyReadTimeout, &cfg.ReadTimeout, DefCfg.ReadTimeout)
+	_ = cfgx.Def.ToStr(KeyWriteTimeout, &cfg.WriteTimeout, DefCfg.WriteTimeout)
 
 	return cfg, nil
 }

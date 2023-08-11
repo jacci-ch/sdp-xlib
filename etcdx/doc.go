@@ -3,12 +3,3 @@
 // license that can be found in the LICENSE file.
 
 package etcdx
-
-// KV
-//
-// A struct like etcd.KV struct but store the key/value
-// in string type instead of []byte.
-type KV struct {
-	Key   string
-	Value string
-}
