@@ -41,7 +41,7 @@ const (
 var (
 	DefCfg = &Config{
 		Level:                        "info",
-		WithCaller:                   true,
+		WithCaller:                   false,
 		FormatterType:                "text",
 		FormatterTimestampEnable:     true,
 		FormatterTimestampFormat:     DatetimeFormat,
