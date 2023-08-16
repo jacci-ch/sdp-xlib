@@ -5,6 +5,7 @@
 package timex
 
 import (
+	"github.com/jacci-ch/sdp-xlib/valuex"
 	"time"
 )
 
@@ -19,6 +20,21 @@ const (
 // A wrapper of time.Time defined in standard library.
 type Time struct {
 	time.Time
+}
+
+// Fmt
+//
+// Format Time to string value with default layout string.
+func (t *Time) Fmt() string {
+	return t.Format(DefaultFormat)
+}
+
+// FmtPtr
+//
+// Format Time to string value with default layout string, and
+// returns the pointer of the formatted string.
+func (t *Time) FmtPtr() *string {
+	return valuex.StrPtr(t.Fmt())
 }
 
 // Now
