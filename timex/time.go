@@ -34,6 +34,10 @@ func (t *Time) Fmt() string {
 // Format Time to string value with default layout string, and
 // returns the pointer of the formatted string.
 func (t *Time) FmtPtr() *string {
+	if t == nil {
+		return nil
+	}
+
 	return valuex.StrPtr(t.Fmt())
 }
 
@@ -62,8 +66,12 @@ func Parse(str string) (Time, error) {
 // ParsePtr
 //
 // Similar with Parse but return a Time pointer.
-func ParsePtr(str string) (*Time, error) {
-	val, err := time.Parse(DefaultFormat, str)
+func ParsePtr(str *string) (*Time, error) {
+	if str == nil {
+		return nil, nil
+	}
+
+	val, err := time.Parse(DefaultFormat, *str)
 	if err != nil {
 		return nil, err
 	}
