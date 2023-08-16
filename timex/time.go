@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	DateTime     = time.DateTime + ".000"
-	DateTimeZone = time.DateTime + ".000+8:00"
+	DateTime      = time.DateTime + ".000"
+	DateTimeZone  = time.DateTime + ".000+8:00"
+	DefaultFormat = DateTimeZone
 )
 
 // Time
@@ -32,4 +33,24 @@ func Now() Time {
 // Returns a pointer of Time object address contains current time.
 func NowPtr() *Time {
 	return &Time{Time: time.Now()}
+}
+
+// Parse
+//
+// Decode string value to Time structure.
+func Parse(str string) (Time, error) {
+	val, err := time.Parse(DefaultFormat, str)
+	return Time{Time: val}, err
+}
+
+// ParsePtr
+//
+// Similar with Parse but return a Time pointer.
+func ParsePtr(str string) (*Time, error) {
+	val, err := time.Parse(DefaultFormat, str)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Time{Time: val}, nil
 }

@@ -16,7 +16,7 @@ import (
 func (t *Time) UnmarshalJSON(data []byte) error {
 	data = bytes.Trim(data, `"`)
 
-	v, err := time.Parse(DateTimeZone, string(data))
+	v, err := time.Parse(DefaultFormat, string(data))
 	if err != nil {
 		return err
 	}
@@ -29,5 +29,5 @@ func (t *Time) UnmarshalJSON(data []byte) error {
 //
 // Unmarshal Time to []byte value using default format string.
 func (t *Time) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, t.Format(DateTimeZone))), nil
+	return []byte(fmt.Sprintf(`"%s"`, t.Format(DefaultFormat))), nil
 }
