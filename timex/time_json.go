@@ -5,6 +5,7 @@
 package timex
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 )
@@ -12,8 +13,10 @@ import (
 // UnmarshalJSON
 //
 // Unmarshal Time from []byte value using default format string.
-func (t *Time) UnmarshalJSON(bytes []byte) error {
-	v, err := time.Parse(DateTimeZone, string(bytes))
+func (t *Time) UnmarshalJSON(data []byte) error {
+	data = bytes.Trim(data, `"`)
+
+	v, err := time.Parse(DateTimeZone, string(data))
 	if err != nil {
 		return err
 	}
