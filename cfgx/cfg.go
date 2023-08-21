@@ -12,27 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package redisx
-
-import "github.com/redis/go-redis/v9"
+package cfgx
 
 var (
-	Client redis.UniversalClient
+	Cfg    *Config
+	DefCfg = &Config{
+		PanicWithError: true,
+	}
 )
 
-// NewClient - creates a new redis Universal Client. See redis documents for more
-// about redis.UniversalClient.
-func NewClient(cfg *Config) (redis.UniversalClient, error) {
-	if err := cfg.validate(); err != nil {
-		return nil, err
-	}
+type Config struct {
+	// The user-specified configuration file name.
+	// We can do parse os.args to pick the configuration file arguments.
+	CfgFile string
 
-	return redis.NewUniversalClient(&redis.UniversalOptions{
-		Addrs:      cfg.Addrs,
-		Username:   cfg.Username,
-		Password:   cfg.Password,
-		ClientName: cfg.ClientName,
-		MasterName: cfg.MasterName,
-		DB:         cfg.Database,
-	}), nil
+	// Whether raise a panic when errors found or not. If PanicWithError is true
+	// this module, cfgx, will raise a panic and exit the program when errors found.
+	//
+	// Otherwise, cfgx do nothing but returns a empty value set.
+	PanicWithError bool
 }

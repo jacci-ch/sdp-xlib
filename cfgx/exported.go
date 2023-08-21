@@ -1,36 +1,48 @@
-// Copyright 2023 - now The SDP Authors. All rights reserved.
-// Use of this source code is governed by a Apache 2.0 style
-// license that can be found in the LICENSE file.
+// Copyright 2023 to now() The SDP Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package cfgx
 
-var (
-	Def = &defaultValueKeeper{}
+import (
+	"github.com/jacci-ch/sdp-xlib/valuex"
+	"time"
 )
 
-// Export cfgv.ValueGetter methods functions as package functions.
-// All functions calls the global value keeper methods.
+var (
+	gValues map[string]string
+)
 
-func ToInt64(name, key string, dst *int64, defaultValue int64) error {
-	return gValueKeeper.ToInt64(name, key, dst, defaultValue)
+func AsInt[T valuex.IntType](key string, dst *T, def T) error {
+	return parseAs(key, dst, def, parseInt[T])
 }
 
-func ToInt32(name, key string, dst *int32, defaultValue int32) error {
-	return gValueKeeper.ToInt32(name, key, dst, defaultValue)
+func AsUint[T valuex.UintType](key string, dst *T, def T) error {
+	return parseAs(key, dst, def, parseUint[T])
 }
 
-func ToInt(name, key string, dst *int, defaultValue int) error {
-	return gValueKeeper.ToInt(name, key, dst, defaultValue)
+func AsStr(key string, dst *string, def string) error {
+	return parseAs(key, dst, def, parseStr)
 }
 
-func ToBool(name, key string, dst *bool, defaultValue bool) error {
-	return gValueKeeper.ToBool(name, key, dst, defaultValue)
+func AsBool(key string, dst *bool, def bool) error {
+	return parseAs(key, dst, def, parseBool)
 }
 
-func ToStr(name, key string, dst *string, defaultValue string) error {
-	return gValueKeeper.ToStr(name, key, dst, defaultValue)
+func AsStrArray(key string, dst *[]string, def []string) error {
+	return parseAs(key, dst, def, parseStrArray)
 }
 
-func ToStrArray(name, key string, dst *[]string, defaultValue []string) error {
-	return gValueKeeper.ToStrArray(name, key, dst, defaultValue)
+func AsDuration(key string, dst *time.Duration, def time.Duration) error {
+	return parseAs(key, dst, def, parseDuration)
 }

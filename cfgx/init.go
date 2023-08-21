@@ -12,27 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package redisx
+package cfgx
 
-import "github.com/redis/go-redis/v9"
-
-var (
-	Client redis.UniversalClient
-)
-
-// NewClient - creates a new redis Universal Client. See redis documents for more
-// about redis.UniversalClient.
-func NewClient(cfg *Config) (redis.UniversalClient, error) {
-	if err := cfg.validate(); err != nil {
-		return nil, err
+func init() {
+	Cfg = &Config{
+		CfgFile:        "",
+		PanicWithError: DefCfg.PanicWithError,
 	}
 
-	return redis.NewUniversalClient(&redis.UniversalOptions{
-		Addrs:      cfg.Addrs,
-		Username:   cfg.Username,
-		Password:   cfg.Password,
-		ClientName: cfg.ClientName,
-		MasterName: cfg.MasterName,
-		DB:         cfg.Database,
-	}), nil
+	// TODO: read command-line options to parse the specified configuration options.
+	// os.Args ...
+
+	gValues, _ = loadConfigs()
 }

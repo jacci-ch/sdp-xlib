@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/json-iterator/go v1.1.12
+	github.com/redis/go-redis/v9 v9.0.5
 	github.com/sirupsen/logrus v1.9.3
 	go.etcd.io/etcd/client/v3 v3.5.9
 	google.golang.org/grpc v1.57.0
@@ -25,7 +26,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/redis/go-redis/v9 v9.0.5 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.9 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.9 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
