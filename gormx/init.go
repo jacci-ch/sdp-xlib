@@ -12,5 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package resolver - pre-implemented resolver.
-package resolver
+package gormx
+
+import "github.com/jacci-ch/sdp-xlib/logx"
+
+func init() {
+	Cfg = loadConfigs()
+	if db, err := NewDB(Cfg); err != nil {
+		logx.Fatal(err)
+	} else if Cfg.Debug {
+		DB = db.Debug()
+	} else {
+		DB = db
+	}
+}

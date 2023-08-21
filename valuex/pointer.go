@@ -12,5 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package resolver - pre-implemented resolver.
-package resolver
+package valuex
+
+import (
+	"sync/atomic"
+	"unsafe"
+)
+
+// SetPtr - atomically writes a pointer value to another address.
+func SetPtr[T any](dst **T, src *T) {
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(dst)), unsafe.Pointer(src))
+}
+
+func Ptr[T any](v T) *T {
+	return &v
+}

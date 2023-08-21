@@ -12,5 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package resolver - pre-implemented resolver.
-package resolver
+package etcdx
+
+import "github.com/jacci-ch/sdp-xlib/logx"
+
+func init() {
+	Cfg = loadConfigs()
+
+	if client, err := NewClient(Cfg); err != nil {
+		logx.Fatal(err)
+	} else {
+		gClient = client
+	}
+}

@@ -1,19 +1,24 @@
-// Copyright 2023 - now The SDP Authors. All rights reserved.
-// Use of this source code is governed by a Apache 2.0 style
-// license that can be found in the LICENSE file.
+// Copyright 2023 to now() The SDP Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package multicast
 
 import (
+	"errors"
 	"fmt"
 	"google.golang.org/grpc"
 	"strings"
-	"sync"
-)
-
-var (
-	gLock sync.Mutex
-	gConn *grpc.ClientConn
 )
 
 // Dial
@@ -21,24 +26,10 @@ var (
 // Connect to given targets listed in arguments endpoints.
 // See doc.go for more information.
 func Dial(endpoints []string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	target := fmt.Sprintf("%v://%v", Scheme, strings.Join(endpoints, Separator))
-	return grpc.Dial(target, opts...)
-}
-
-// GetConn
-//
-// Returns the global grpc.ClientConn instance.
-func GetConn(endpoints []string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	if gConn == nil {
-		gLock.Lock()
-		cc, err := Dial(endpoints, opts...)
-		if err == nil {
-			gConn = cc
-		}
-		gLock.Unlock()
-
-		return cc, err
+	if len(endpoints) == 0 {
+		return nil, errors.New("grpcx: endpoints can't be empty")
 	}
 
-	return gConn, nil
+	target := fmt.Sprintf("%v://%v", Scheme, strings.Join(endpoints, Separator))
+	return grpc.Dial(target, opts...)
 }

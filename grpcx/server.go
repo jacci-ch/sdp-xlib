@@ -1,6 +1,16 @@
-// Copyright 2023 - now The SDP Authors. All rights reserved.
-// Use of this source code is governed by a Apache 2.0 style
-// license that can be found in the LICENSE file.
+// Copyright 2023 to now() The SDP Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package grpcx
 
@@ -12,65 +22,98 @@ import (
 )
 
 type Server struct {
-	Cfg     *Config
+	// Configuration used to create real grpc server, includes listen addr
+	// and port, NATed addr and port.
+	//
+	// In fact only the creation of server listener is depends on these
+	// configurations.
+	cfg *Config
+
+	// A flag indicates that the server's status. This flag will be set
+	// to be true before grpc.Serve() is called, cause this function will
+	// block the go routine.
+	//
+	// This flag will be set to be false after grpc.Serve() exit or execution
+	// of function Server.Stop.
 	isStart bool
 
-	waitGroup  sync.WaitGroup
+	// A sync instance to wait for serve routine to exit. We can call the method
+	// Server.ServeAndWait() to wait for it.
+	waitGroup sync.WaitGroup
+
+	// The real grpc.Server object create with grpc.NewServer().
 	realServer *grpc.Server
 
-	userServer GrpcServer
+	// A list of ser-registered grpc server. GrpcServer.RegisterRpc method
+	// will be called before serve.
+	servers []GrpcServer
 }
 
-// Serve
-//
-// Start the server. The rpc.register and hooks will be called
-// at the appropriate time.
+// Serve - start the server. The BeforeStartHook of all registered servers
+// will be called one-by-one before server is started. And the AfterStartHook
+// hooks will be called after the server is started.
 func (s *Server) Serve() error {
 	if s.isStart {
 		return errors.New("grpcx: server is already started")
-	}
-
-	if hook, ok := s.userServer.(BeforeStartHook); ok {
-		if err := hook.BeforeServerStart(s); err != nil {
+	} else {
+		// executes all BeforeStartHook hooks.
+		if err := s.execBeforeStartHook(); err != nil {
+			logx.Errorf("grpcx: %v", err)
 			return err
 		}
-	}
 
-	if err := s.start(); err != nil {
-		return err
-	}
-
-	if hook, ok := s.userServer.(AfterStartHook); ok {
-		if err := hook.AfterServerStart(s); err != nil {
-			s.Stop()
+		if err := s.start(); err != nil {
+			logx.Errorf("grpcx: %v", err)
 			return err
 		}
-	}
 
-	return nil
+		// executes all AfterStartHook hooks.
+		if err := s.execAfterStartHook(); err != nil {
+			s.stop(false)
+			logx.Errorf("grpcx: %v", err)
+			return err
+		}
+
+		return nil
+	}
 }
 
-// ServeAndWait
-//
-// Start the server and wait for its stopping.
+// ServeAndWait - start the server and wait for its stopping.
+// See document of Server.Serve for more information.
 func (s *Server) ServeAndWait() error {
 	if err := s.Serve(); err != nil {
 		return err
+	} else {
+		s.waitGroup.Wait()
+		return nil
 	}
-
-	s.waitGroup.Wait()
-	return nil
 }
 
-// start
-//
-// Starts the server.
+// Stop - this function stops the server by call to grpc.Server.GracefulStop.
+// The BeforeStopHook will be called before the method is called.
+func (s *Server) Stop() {
+	s.stop(true)
+}
+
+func (s *Server) stop(invokeHook bool) {
+	if s.isStart {
+		// executes all BeforeStopHook hooks.
+		if invokeHook {
+			s.execBeforeStopHook()
+		}
+
+		s.realServer.GracefulStop()
+		s.isStart = false
+	}
+}
+
+// start - starts the server.
 func (s *Server) start() error {
-	if err := s.userServer.Register(s.realServer); err != nil {
+	if err := s.execRegisterRpcHook(); err != nil {
 		return err
 	}
 
-	listener, err := NewListenerWithCfg(s.Cfg)
+	listener, err := NewListenerWithCfg(s.cfg)
 	if err != nil {
 		return err
 	}
@@ -78,10 +121,13 @@ func (s *Server) start() error {
 	s.waitGroup.Add(1)
 	go func() {
 		s.isStart = true
-		logx.Logger.Infof("rgpcx: server is serve on %v", s.Cfg.Endpoint())
+
+		logx.Infof("grpcx: server is serve on %v:%v", s.cfg.Addr, s.cfg.Port)
 		if err = s.realServer.Serve(listener); err != nil {
-			logx.Logger.Fatal("grpcx: ", err)
+			logx.Fatal("grpcx: ", err)
+			return
 		}
+
 		s.isStart = false
 		s.waitGroup.Done()
 	}()
@@ -89,56 +135,72 @@ func (s *Server) start() error {
 	return nil
 }
 
-// Stop
-//
-// This function stop the server by call to grpc.Server.GracefulStop function.
-// The BeforeStopHook will be called before the method is called.
-func (s *Server) Stop() {
-	if !s.isStart {
-		return
+func (s *Server) execRegisterRpcHook() error {
+	for _, server := range s.servers {
+		if err := server.RegisterRpc(s.cfg, s.realServer); err != nil {
+			return err
+		}
 	}
 
-	if hook, ok := s.userServer.(BeforeStopHook); ok {
-		hook.BeforeServerStop(s)
-	}
-
-	s.realServer.GracefulStop()
-	s.isStart = false
+	return nil
 }
 
-// NewServerWithCfg
-//
-// New a server with given configurations and the register.
-func NewServerWithCfg(cfg *Config, server GrpcServer) (*Server, error) {
-	if cfg == nil {
-		return nil, errors.New("grpcx: argument cfg can't be nil")
+func (s *Server) execBeforeStartHook() error {
+	for _, server := range s.servers {
+		if hook, ok := server.(BeforeStartHook); ok {
+			if err := hook.BeforeServerStart(s); err != nil {
+				return err
+			}
+		}
 	}
 
-	if err := cfg.Validate(); err != nil {
-		return nil, err
+	return nil
+}
+
+func (s *Server) execAfterStartHook() error {
+	for _, server := range s.servers {
+		if hook, ok := server.(AfterStartHook); ok {
+			if err := hook.AfterServerStart(s); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *Server) execBeforeStopHook() {
+	for _, server := range s.servers {
+		if hook, ok := server.(BeforeStopHook); ok {
+			hook.BeforeServerStop(s)
+		}
+	}
+}
+
+// NewServerWithCfg - creates a server with given configurations and grpc servers.
+func NewServerWithCfg(cfg *Config, servers ...GrpcServer) (*Server, error) {
+	if cfg == nil || len(servers) == 0 {
+		return nil, errors.New("grpcx: argument cfg/servers can't be nil")
 	}
 
 	s := grpc.NewServer()
-	return &Server{Cfg: cfg, realServer: s, userServer: server}, nil
+	return &Server{cfg: cfg, realServer: s, servers: servers}, nil
 }
 
-// NewServerWithKeys
-//
-// New a server with given configuration keys and the register. This function
-// loads all configurations and then call to NewServerWithCfg to create a
-// new server object.
-func NewServerWithKeys(keys *ConfigKeys, server GrpcServer) (*Server, error) {
-	cfg, err := LoadConfigsWith(keys)
+// NewServerWithKeys - creates a server with given configuration keys
+// and the grpc servers. This function loads all configurations and then
+// call to NewServerWithCfg to create a new server object.
+func NewServerWithKeys(keys *ConfigKeys, servers ...GrpcServer) (*Server, error) {
+	cfg, err := loadConfigs(keys)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewServerWithCfg(cfg, server)
+	return NewServerWithCfg(cfg, servers...)
 }
 
-// NewServer
-//
-// New a server with default configurations and the given register.
-func NewServer(server GrpcServer) (*Server, error) {
-	return NewServerWithCfg(Cfg, server)
+// NewServer - creates a server with default configurations and
+// the given grpc server.
+func NewServer(servers ...GrpcServer) (*Server, error) {
+	return NewServerWithCfg(Cfg, servers...)
 }

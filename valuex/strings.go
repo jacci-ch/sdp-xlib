@@ -1,6 +1,16 @@
-// Copyright 2023 - now The SDP Authors. All rights reserved.
-// Use of this source code is governed by a Apache 2.0 style
-// license that can be found in the LICENSE file.
+// Copyright 2023 to now() The SDP Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package valuex
 
@@ -9,10 +19,8 @@ import (
 	"unicode"
 )
 
-// HasPrefixIn
-//
-// Detects whether str has one of the prefix in the given list.
-// This function returns false if no prefix matches.
+// HasPrefixIn - detects whether str has one of the prefix in
+// the given list. This function returns false if no prefix matches.
 func HasPrefixIn(str string, prefixes []string) bool {
 	for _, v := range prefixes {
 		if strings.HasPrefix(str, v) {
@@ -23,10 +31,8 @@ func HasPrefixIn(str string, prefixes []string) bool {
 	return false
 }
 
-// CamelToUnderline
-//
-// Converts src string from Camel-Format (e.g SameStringInCamelFormat) to
-// Underline-Format (e.g some_string_in_underline_format).
+// CamelToUnderline - converts src string from Camel-Format (e.g StringInCamelFormat)
+// to Underline-Format (e.g string_in_underline_format).
 func CamelToUnderline(src string) string {
 	sb := strings.Builder{}
 
@@ -44,9 +50,7 @@ func CamelToUnderline(src string) string {
 	return sb.String()
 }
 
-// FirstToLower
-//
-// Converts the first rune to lower-case.
+// FirstToLower - converts the first rune to lower-case.
 func FirstToLower(src string) string {
 	if len(src) == 0 {
 		return src
@@ -55,9 +59,7 @@ func FirstToLower(src string) string {
 	return strings.ToLower(src[:1]) + src[1:]
 }
 
-// FirstToUpper
-//
-// Converts the first rune to upper-case.
+// FirstToUpper - converts the first rune to upper-case.
 func FirstToUpper(src string) string {
 	if len(src) == 0 {
 		return src
@@ -66,23 +68,12 @@ func FirstToUpper(src string) string {
 	return strings.ToUpper(src[:1]) + src[1:]
 }
 
-// EmptyStrPtr
-//
-// Detects the string pointer is nil or contains no value.
-func EmptyStrPtr(v *string) bool {
+// EmptyStr - detects the string pointer is not nil and contains some value.
+func EmptyStr(v *string) bool {
 	return v == nil || len(*v) == 0
 }
 
-// NotEmptyStrPtr
-//
-// Detects the string pointer is not nil and contains some value.
-func NotEmptyStrPtr(v *string) bool {
-	return !EmptyStrPtr(v)
-}
-
-// FirstNonDigit
-//
-// Returns the index of first non-digit (not a digit value) rune.
+// FirstNonDigit - retrieves  the index of first non-digit (not a digit value) rune.
 func FirstNonDigit(str string) int {
 	return strings.IndexFunc(str, func(r rune) bool {
 		return !unicode.IsDigit(r)

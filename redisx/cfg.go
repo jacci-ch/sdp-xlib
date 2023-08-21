@@ -1,14 +1,22 @@
-// Copyright 2023 - now The SDP Authors. All rights reserved.
-// Use of this source code is governed by a Apache 2.0 style
-// license that can be found in the LICENSE file.
+// Copyright 2023 to now() The SDP Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package redisx
 
 import (
 	"errors"
-	"fmt"
 	"github.com/jacci-ch/sdp-xlib/cfgx"
-	"github.com/jacci-ch/sdp-xlib/timex"
 	"time"
 )
 
@@ -27,67 +35,45 @@ const (
 var (
 	Cfg    *Config
 	DefCfg = &Config{
-		ReadTimeout:  "30s",
-		WriteTimeout: "30s",
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
 	}
 )
 
-// Config
-//
-// A struct holds all configurations.
+// Config - a structure holds all configurations.
 type Config struct {
-	Addrs      []string
-	MasterName string
-	ClientName string
-	Username   string
-	Password   string
-	Database   int
-
-	ReadTimeout         string
-	ReadTimeoutDuration time.Duration
-
-	WriteTimeout         string
-	WriteTimeoutDuration time.Duration
+	Addrs        []string
+	MasterName   string
+	ClientName   string
+	Username     string
+	Password     string
+	Database     int
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
 }
 
-// Validate
-//
-// Validates the configurations.
-func (c *Config) Validate() error {
+// validate - validates the configurations.
+func (c *Config) validate() error {
 	if len(c.Addrs) == 0 {
 		return errors.New("redisx: addresses can't be empty")
 	}
 
-	tu, err := timex.ParseTimeUnit(c.ReadTimeout)
-	if err != nil {
-		return fmt.Errorf("redisx: invalid read timeout '%v'", err)
-	}
-	c.ReadTimeoutDuration = tu.Duration
-
-	tu, err = timex.ParseTimeUnit(c.WriteTimeout)
-	if err != nil {
-		return fmt.Errorf("redisx: invalid write timeout '%v'", err)
-	}
-	c.WriteTimeoutDuration = tu.Duration
-
 	return nil
 }
 
-// LoadConfigs
-//
-// Load all configurations from cfgx module.
-func LoadConfigs() (*Config, error) {
+// loadConfigs - loads all configurations from cfgx module.
+func loadConfigs() *Config {
 	cfg := &Config{}
 
-	_ = cfgx.Def.ToStrArray(KeyAddrs, &cfg.Addrs, DefCfg.Addrs)
-	_ = cfgx.Def.ToStr(KeyMaster, &cfg.MasterName, DefCfg.MasterName)
-	_ = cfgx.Def.ToStr(KeyClient, &cfg.ClientName, DefCfg.ClientName)
-	_ = cfgx.Def.ToStr(KeyUsername, &cfg.Username, DefCfg.Username)
-	_ = cfgx.Def.ToStr(KeyPassword, &cfg.Password, DefCfg.Password)
-	_ = cfgx.Def.ToInt(KeyDatabase, &cfg.Database, DefCfg.Database)
+	_ = cfgx.AsStrArray(KeyAddrs, &cfg.Addrs, DefCfg.Addrs)
+	_ = cfgx.AsStr(KeyMaster, &cfg.MasterName, DefCfg.MasterName)
+	_ = cfgx.AsStr(KeyClient, &cfg.ClientName, DefCfg.ClientName)
+	_ = cfgx.AsStr(KeyUsername, &cfg.Username, DefCfg.Username)
+	_ = cfgx.AsStr(KeyPassword, &cfg.Password, DefCfg.Password)
+	_ = cfgx.AsInt(KeyDatabase, &cfg.Database, DefCfg.Database)
 
-	_ = cfgx.Def.ToStr(KeyReadTimeout, &cfg.ReadTimeout, DefCfg.ReadTimeout)
-	_ = cfgx.Def.ToStr(KeyWriteTimeout, &cfg.WriteTimeout, DefCfg.WriteTimeout)
+	_ = cfgx.AsDuration(KeyReadTimeout, &cfg.ReadTimeout, DefCfg.ReadTimeout)
+	_ = cfgx.AsDuration(KeyWriteTimeout, &cfg.WriteTimeout, DefCfg.WriteTimeout)
 
-	return cfg, nil
+	return cfg
 }

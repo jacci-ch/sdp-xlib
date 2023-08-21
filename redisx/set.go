@@ -12,5 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package resolver - pre-implemented resolver.
-package resolver
+package redisx
+
+import (
+	"context"
+	"time"
+)
+
+// Set - stores key-value with given TTL to cache storage.
+func Set(key string, value any, ttl time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), Cfg.WriteTimeout)
+	defer cancel()
+
+	return Client.Set(ctx, key, value, ttl).Err()
+}

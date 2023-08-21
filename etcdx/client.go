@@ -12,29 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package redisx
+package etcdx
 
-import "github.com/redis/go-redis/v9"
-
-var (
-	Client redis.UniversalClient
+import (
+	"errors"
+	etcd "go.etcd.io/etcd/client/v3"
 )
 
-// NewClient
-//
-// Create a new redis Universal Client. See redis documents for more
-// about redis.UniversalClient.
-func NewClient(cfg *Config) (redis.UniversalClient, error) {
+var (
+	gClient *etcd.Client
+)
+
+// KV - a struct like etcd.KV struct but store the key/value
+// in string type instead of []byte.
+type KV[T any] struct {
+	Key   string
+	Value *T
+}
+
+// NewClient - creates an etcd client with given configuration.
+func NewClient(cfg *Config) (*etcd.Client, error) {
 	if err := cfg.validate(); err != nil {
 		return nil, err
 	}
 
-	return redis.NewUniversalClient(&redis.UniversalOptions{
-		Addrs:      cfg.Addrs,
-		Username:   cfg.Username,
-		Password:   cfg.Password,
-		ClientName: cfg.ClientName,
-		MasterName: cfg.MasterName,
-		DB:         cfg.Database,
-	}), nil
+	etcdCfg := etcd.Config{
+		Endpoints:   cfg.Endpoints,
+		DialTimeout: cfg.DialTimeout,
+	}
+
+	client, err := etcd.New(etcdCfg)
+	if err != nil {
+		return nil, errors.New("etcdx: " + err.Error())
+	}
+
+	return client, nil
 }

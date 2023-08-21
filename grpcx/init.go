@@ -12,5 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package resolver - pre-implemented resolver.
-package resolver
+package grpcx
+
+import "github.com/jacci-ch/sdp-xlib/logx"
+
+func init() {
+	cfg, err := loadConfigs(DefKeys)
+	if err != nil {
+		logx.Fatal(err)
+		return
+	}
+
+	Cfg = cfg
+}

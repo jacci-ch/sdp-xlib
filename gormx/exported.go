@@ -12,5 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package resolver - pre-implemented resolver.
-package resolver
+package gormx
+
+import (
+	"fmt"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
+
+var (
+	DB *gorm.DB
+)
+
+// NewDB - opens and generates a new gorm.DB with given configuration.
+func NewDB(cfg *Config) (*gorm.DB, error) {
+	if err := cfg.validate(); err != nil {
+		return nil, err
+	}
+
+	db, err := gorm.Open(mysql.Open(cfg.Dsn), &gorm.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("gormx: %v", err)
+	}
+
+	return db, err
+}
