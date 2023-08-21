@@ -137,7 +137,7 @@ func (s *Server) start() error {
 
 func (s *Server) execRegisterRpcHook() error {
 	for _, server := range s.servers {
-		if err := server.RegisterRpc(s.cfg, s.realServer); err != nil {
+		if err := server.RegisterRpc(s.realServer); err != nil {
 			return err
 		}
 	}
@@ -148,7 +148,7 @@ func (s *Server) execRegisterRpcHook() error {
 func (s *Server) execBeforeStartHook() error {
 	for _, server := range s.servers {
 		if hook, ok := server.(BeforeStartHook); ok {
-			if err := hook.BeforeServerStart(s); err != nil {
+			if err := hook.BeforeServerStart(s.cfg, s); err != nil {
 				return err
 			}
 		}
@@ -160,7 +160,7 @@ func (s *Server) execBeforeStartHook() error {
 func (s *Server) execAfterStartHook() error {
 	for _, server := range s.servers {
 		if hook, ok := server.(AfterStartHook); ok {
-			if err := hook.AfterServerStart(s); err != nil {
+			if err := hook.AfterServerStart(s.cfg, s); err != nil {
 				return err
 			}
 		}
@@ -172,7 +172,7 @@ func (s *Server) execAfterStartHook() error {
 func (s *Server) execBeforeStopHook() {
 	for _, server := range s.servers {
 		if hook, ok := server.(BeforeStopHook); ok {
-			hook.BeforeServerStop(s)
+			hook.BeforeServerStop(s.cfg, s)
 		}
 	}
 }

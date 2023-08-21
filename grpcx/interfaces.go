@@ -21,26 +21,26 @@ import (
 // GrpcServer - a grpc server implementation which implement this interface to
 // register itself to grpc.Server.
 type GrpcServer interface {
-	RegisterRpc(cfg *Config, s *grpc.Server) error
+	RegisterRpc(s *grpc.Server) error
 }
 
 // BeforeStartHook
 //
 // A hook execute before server start (before grpc.Server.Serve called).
 type BeforeStartHook interface {
-	BeforeServerStart(s *Server) error
+	BeforeServerStart(cfg *Config, s *Server) error
 }
 
 // AfterStartHook
 //
 // A hook execute after server start (after grpc.Server.Serve called).
 type AfterStartHook interface {
-	AfterServerStart(s *Server) error
+	AfterServerStart(cfg *Config, s *Server) error
 }
 
 // BeforeStopHook
 //
 // A hook execute before server stop (after grpc.Server.stop called).
 type BeforeStopHook interface {
-	BeforeServerStop(s *Server)
+	BeforeServerStop(cfg *Config, s *Server)
 }
