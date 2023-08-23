@@ -23,52 +23,48 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// Get - retrieves the value of given key stored in redis server.
-// This function call jsonx function to decode string values to given type.
-func Get[T any](key string) (*T, error) {
+func doGet[T any](get func(ctx context.Context) (string, error)) (*T, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), Cfg.ReadTimeout)
 	defer cancel()
 
-	rsp, err := Client.Get(ctx, key).Result()
-	if err != nil && err != redis.Nil {
-		logx.Error(err)
-	}
+	if rsp, err := get(ctx); err == nil {
+		if len(rsp) == 0 {
+			return nil, nil
+		} else {
+			var v T
+			if err = jsonx.UnmarshalFromString(rsp, &v); err != nil {
+				return nil, err
+			} else {
+				return &v, err
+			}
+		}
+	} else {
+		if err != redis.Nil {
+			logx.Error(err)
+		}
 
-	var v T
-	if err = jsonx.UnmarshalFromString(rsp, &v); err != nil {
-		return &v, err
+		return nil, err
 	}
+}
 
-	return nil, err
+// Get - retrieves the value of given key stored in redis server.
+// This function call jsonx function to decode string values to given type.
+func Get[T any](key string) (*T, error) {
+	return doGet[T](func(ctx context.Context) (string, error) {
+		return Client.Get(ctx, key).Result()
+	})
 }
 
 // GetEx - retrieves the value stored in redis server and prolong the
 // TTL of the given key.
 func GetEx[T any](key string, ttl time.Duration) (*T, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), Cfg.ReadTimeout)
-	defer cancel()
-
-	rsp, err := Client.GetEx(ctx, key, ttl).Result()
-	if err != nil && err != redis.Nil {
-		logx.Error(err)
-	}
-
-	if len(rsp) == 0 {
-		return nil, nil
-	} else {
-		var v T
-		err = jsonx.UnmarshalFromString(rsp, &v)
-		return &v, err
-	}
+	return doGet[T](func(ctx context.Context) (string, error) {
+		return Client.GetEx(ctx, key, ttl).Result()
+	})
 }
 
-// GetWithProvider - retrieves value of given key as given type. If the given key is not existed,
-// this function will call given provider function to generate the new data,
-// and set the new generated data to cache storage with given TTL.
-//
-// This function will exit when the data provider returns an error.
-func GetWithProvider[T any](key string, ttl time.Duration, provider Provider[T]) (*T, error) {
-	rsp, err := Get[T](key)
+func doGetWithProvider[T any](key string, ttl time.Duration, get func() (*T, error), provider Provider[T]) (*T, error) {
+	rsp, err := get()
 	if err == nil || err != redis.Nil {
 		return rsp, err
 	}
@@ -79,14 +75,30 @@ func GetWithProvider[T any](key string, ttl time.Duration, provider Provider[T])
 		return v, err
 	}
 
-	if str, err := jsonx.MarshalToString(v); err != nil {
-		logx.Error(err)
-		return nil, err
-	} else if err = Set(key, str, ttl); err != nil {
+	str := ""
+	if v != nil {
+		if str, err = jsonx.MarshalToString(v); err != nil {
+			logx.Error(err)
+			return nil, err
+		}
+	}
+
+	if err = Set(key, str, ttl); err != nil {
 		logx.Error(err)
 	}
 
 	return v, nil
+}
+
+// GetWithProvider - retrieves value of given key as given type. If the given key is not existed,
+// this function will call given provider function to generate the new data,
+// and set the new generated data to cache storage with given TTL.
+//
+// This function will exit when the data provider returns an error.
+func GetWithProvider[T any](key string, ttl time.Duration, provider Provider[T]) (*T, error) {
+	return doGetWithProvider(key, ttl, func() (*T, error) {
+		return Get[T](key)
+	}, provider)
 }
 
 // GetExWithProvider - retrieves value of given key as given type. If the given
@@ -96,25 +108,9 @@ func GetWithProvider[T any](key string, ttl time.Duration, provider Provider[T])
 //
 // This function will exit when the data provider returns an error.
 func GetExWithProvider[T any](key string, ttl time.Duration, provider Provider[T]) (*T, error) {
-	rsp, err := GetEx[T](key, ttl)
-	if err == nil || err != redis.Nil {
-		return rsp, err
-	}
-
-	v, err := provider()
-	if err != nil {
-		logx.Error(err)
-		return v, err
-	}
-
-	if str, err := jsonx.MarshalToString(v); err != nil {
-		logx.Error(err)
-		return nil, err
-	} else if err = Set(key, str, ttl); err != nil {
-		logx.Error(err)
-	}
-
-	return v, nil
+	return doGetWithProvider(key, ttl, func() (*T, error) {
+		return GetEx[T](key, ttl)
+	}, provider)
 }
 
 // Provider - a callback function definition for data provider.
