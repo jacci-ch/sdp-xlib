@@ -26,3 +26,11 @@ func Set(key string, value any, ttl time.Duration) error {
 
 	return Client.Set(ctx, key, value, ttl).Err()
 }
+
+// Del - deletes keys in cache server.
+func Del(keys ...string) {
+	ctx, cancel := context.WithTimeout(context.Background(), Cfg.WriteTimeout)
+	defer cancel()
+
+	Client.Del(ctx, keys...)
+}
