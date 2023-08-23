@@ -177,8 +177,8 @@ func (s *Server) execBeforeStopHook() {
 	}
 }
 
-// NewServerWithCfg - creates a server with given configurations and grpc servers.
-func NewServerWithCfg(cfg *Config, servers ...GrpcServer) (*Server, error) {
+// NewWithCfg - creates a server with given configurations and grpc servers.
+func NewWithCfg(cfg *Config, servers ...GrpcServer) (*Server, error) {
 	if cfg == nil || len(servers) == 0 {
 		return nil, errors.New("grpcx: argument cfg/servers can't be nil")
 	}
@@ -187,20 +187,46 @@ func NewServerWithCfg(cfg *Config, servers ...GrpcServer) (*Server, error) {
 	return &Server{cfg: cfg, realServer: s, servers: servers}, nil
 }
 
-// NewServerWithKeys - creates a server with given configuration keys
+func NewWithCfgAndProvider(cfg *Config, providers ...func() (GrpcServer, error)) (*Server, error) {
+	var servers []GrpcServer
+	for _, provider := range providers {
+		if server, err := provider(); err != nil {
+			return nil, err
+		} else {
+			servers = append(servers, server)
+		}
+	}
+
+	return NewWithCfg(cfg, servers...)
+}
+
+// NewWithKeys - creates a server with given configuration keys
 // and the grpc servers. This function loads all configurations and then
-// call to NewServerWithCfg to create a new server object.
-func NewServerWithKeys(keys *ConfigKeys, servers ...GrpcServer) (*Server, error) {
+// call to NewWithCfg to create a new server object.
+func NewWithKeys(keys *ConfigKeys, servers ...GrpcServer) (*Server, error) {
 	cfg, err := loadConfigs(keys)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewServerWithCfg(cfg, servers...)
+	return NewWithCfg(cfg, servers...)
+}
+
+func NewWithKeysAndProvider(keys *ConfigKeys, providers ...func() (GrpcServer, error)) (*Server, error) {
+	cfg, err := loadConfigs(keys)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewWithCfgAndProvider(cfg, providers...)
 }
 
 // NewServer - creates a server with default configurations and
 // the given grpc server.
 func NewServer(servers ...GrpcServer) (*Server, error) {
-	return NewServerWithCfg(Cfg, servers...)
+	return NewWithCfg(Cfg, servers...)
+}
+
+func NewWithProvider(providers ...func() (GrpcServer, error)) (*Server, error) {
+	return NewWithCfgAndProvider(Cfg, providers...)
 }
