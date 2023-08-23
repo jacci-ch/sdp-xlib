@@ -16,10 +16,11 @@ package redisx
 
 import (
 	"context"
+	"time"
+
 	"github.com/jacci-ch/sdp-xlib/jsonx"
 	"github.com/jacci-ch/sdp-xlib/logx"
 	"github.com/redis/go-redis/v9"
-	"time"
 )
 
 // Get - retrieves the value of given key stored in redis server.
@@ -52,26 +53,27 @@ func GetEx[T any](key string, ttl time.Duration) (*T, error) {
 		logx.Error(err)
 	}
 
-	var v T
-	if err = jsonx.UnmarshalFromString(rsp, &v); err != nil {
+	if len(rsp) == 0 {
+		return nil, nil
+	} else {
+		var v T
+		err = jsonx.UnmarshalFromString(rsp, &v)
 		return &v, err
 	}
-
-	return &v, err
 }
 
-// GetWith - retrieves value of given key as given type. If the given key is not existed,
+// GetWithProvider - retrieves value of given key as given type. If the given key is not existed,
 // this function will call given provider function to generate the new data,
 // and set the new generated data to cache storage with given TTL.
 //
 // This function will exit when the data provider returns an error.
-func GetWith[T any](key string, ttl time.Duration, provide Provider[T]) (*T, error) {
+func GetWithProvider[T any](key string, ttl time.Duration, provider Provider[T]) (*T, error) {
 	rsp, err := Get[T](key)
 	if err == nil || err != redis.Nil {
 		return rsp, err
 	}
 
-	v, err := provide()
+	v, err := provider()
 	if err != nil {
 		logx.Error(err)
 		return v, err
@@ -87,19 +89,19 @@ func GetWith[T any](key string, ttl time.Duration, provide Provider[T]) (*T, err
 	return v, nil
 }
 
-// GetExWith - retrieves value of given key as given type. If the given
+// GetExWithProvider - retrieves value of given key as given type. If the given
 // key is not existed, this function will call given provider function to
 // generate the new data, and set the new generated data to cache storage
 // with given TTL.
 //
 // This function will exit when the data provider returns an error.
-func GetExWith[T any](key string, ttl time.Duration, provide Provider[T]) (*T, error) {
+func GetExWithProvider[T any](key string, ttl time.Duration, provider Provider[T]) (*T, error) {
 	rsp, err := GetEx[T](key, ttl)
 	if err == nil || err != redis.Nil {
 		return rsp, err
 	}
 
-	v, err := provide()
+	v, err := provider()
 	if err != nil {
 		logx.Error(err)
 		return v, err
@@ -116,7 +118,7 @@ func GetExWith[T any](key string, ttl time.Duration, provide Provider[T]) (*T, e
 }
 
 // Provider - a callback function definition for data provider.
-// When we call GetWith() functions we need to specify a
+// When we call GetWithProvider() functions we need to specify a
 // provider function to generate data while the cached value
 // is not found.
 type Provider[T any] func() (*T, error)
