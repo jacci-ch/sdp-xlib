@@ -16,8 +16,9 @@ package redisx
 
 import (
 	"errors"
-	"github.com/jacci-ch/sdp-xlib/cfgx"
 	"time"
+
+	"github.com/jacci-ch/sdp-xlib/cfgx"
 )
 
 const (
