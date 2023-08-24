@@ -110,7 +110,9 @@ func (s *Server) stop(invokeHook bool) {
 
 // start - starts the server.
 func (s *Server) start() error {
-	s.execRegisterRpcHook()
+	if err := s.execRegisterRpcHook(); err != nil {
+		return err
+	}
 
 	listener, err := NewListenerWithCfg(s.cfg)
 	if err != nil {
@@ -134,10 +136,14 @@ func (s *Server) start() error {
 	return nil
 }
 
-func (s *Server) execRegisterRpcHook() {
+func (s *Server) execRegisterRpcHook() error {
 	for _, server := range s.servers {
-		server.RegisterRpc(s.realServer)
+		if err := server.RegisterRpc(s.realServer); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func (s *Server) execBeforeStartHook() error {
