@@ -16,6 +16,7 @@ package grpcx
 
 import (
 	"errors"
+
 	"github.com/jacci-ch/sdp-xlib/cfgx"
 )
 
@@ -26,7 +27,7 @@ var (
 		NatAddr: "server.rpc.listen.nat.addr",
 		NatPort: "server.rpc.listen.nat.port",
 	}
-	Cfg    *Config
+	gCfg   *Config
 	DefCfg = &Config{Port: "9527"}
 )
 

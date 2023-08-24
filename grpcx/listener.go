@@ -47,5 +47,5 @@ func NewListenerWithKeys(keys *ConfigKeys) (net.Listener, error) {
 
 // NewListener - creates a listener with default configurations.
 func NewListener() (net.Listener, error) {
-	return NewListenerWithCfg(Cfg)
+	return NewListenerWithCfg(gCfg)
 }

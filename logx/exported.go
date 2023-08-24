@@ -80,6 +80,11 @@ func Fatal(args ...any) {
 	gLogger.Fatal(args...)
 }
 
+func FatalErr(err error) error {
+	gLogger.Fatal(err)
+	return err
+}
+
 func Panic(args ...any) {
 	gLogger.Panic(args...)
 }

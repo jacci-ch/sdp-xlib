@@ -14,7 +14,9 @@
 
 package grpcx
 
-import "github.com/jacci-ch/sdp-xlib/logx"
+import (
+	"github.com/jacci-ch/sdp-xlib/logx"
+)
 
 func init() {
 	cfg, err := loadConfigs(DefKeys)
@@ -23,5 +25,5 @@ func init() {
 		return
 	}
 
-	Cfg = cfg
+	gCfg = cfg
 }

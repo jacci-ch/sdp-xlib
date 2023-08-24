@@ -16,9 +16,10 @@ package grpcx
 
 import (
 	"errors"
+	"sync"
+
 	"github.com/jacci-ch/sdp-xlib/logx"
 	"google.golang.org/grpc"
-	"sync"
 )
 
 type Server struct {
@@ -109,9 +110,7 @@ func (s *Server) stop(invokeHook bool) {
 
 // start - starts the server.
 func (s *Server) start() error {
-	if err := s.execRegisterRpcHook(); err != nil {
-		return err
-	}
+	s.execRegisterRpcHook()
 
 	listener, err := NewListenerWithCfg(s.cfg)
 	if err != nil {
@@ -135,14 +134,10 @@ func (s *Server) start() error {
 	return nil
 }
 
-func (s *Server) execRegisterRpcHook() error {
+func (s *Server) execRegisterRpcHook() {
 	for _, server := range s.servers {
-		if err := server.RegisterRpc(s.realServer); err != nil {
-			return err
-		}
+		server.RegisterRpc(s.realServer)
 	}
-
-	return nil
 }
 
 func (s *Server) execBeforeStartHook() error {
@@ -177,56 +172,30 @@ func (s *Server) execBeforeStopHook() {
 	}
 }
 
-// NewWithCfg - creates a server with given configurations and grpc servers.
-func NewWithCfg(cfg *Config, servers ...GrpcServer) (*Server, error) {
-	if cfg == nil || len(servers) == 0 {
-		return nil, errors.New("grpcx: argument cfg/servers can't be nil")
+// NewServer - creates a grpc server with given options.
+func NewServer(opts ...Option) (*Server, error) {
+	if opts == nil || len(opts) == 0 {
+		err := errors.New("grpcx: no options to create grpcx server")
+		return nil, logx.FatalErr(err)
 	}
 
-	s := grpc.NewServer()
-	return &Server{cfg: cfg, realServer: s, servers: servers}, nil
-}
+	server := &Server{realServer: grpc.NewServer()}
+	for _, apply := range opts {
+		if apply == nil {
+			err := errors.New("grpcx: argument option can't be nil")
+			return nil, logx.FatalErr(err)
+		}
 
-func NewWithCfgAndProvider(cfg *Config, providers ...func() (GrpcServer, error)) (*Server, error) {
-	var servers []GrpcServer
-	for _, provider := range providers {
-		if server, err := provider(); err != nil {
+		if err := apply(server); err != nil {
+			logx.Fatal(err)
 			return nil, err
-		} else {
-			servers = append(servers, server)
 		}
 	}
 
-	return NewWithCfg(cfg, servers...)
-}
-
-// NewWithKeys - creates a server with given configuration keys
-// and the grpc servers. This function loads all configurations and then
-// call to NewWithCfg to create a new server object.
-func NewWithKeys(keys *ConfigKeys, servers ...GrpcServer) (*Server, error) {
-	cfg, err := loadConfigs(keys)
-	if err != nil {
-		return nil, err
+	if server.cfg == nil {
+		logx.Info("grpcx: use default configuration")
+		server.cfg = gCfg
 	}
 
-	return NewWithCfg(cfg, servers...)
-}
-
-func NewWithKeysAndProvider(keys *ConfigKeys, providers ...func() (GrpcServer, error)) (*Server, error) {
-	cfg, err := loadConfigs(keys)
-	if err != nil {
-		return nil, err
-	}
-
-	return NewWithCfgAndProvider(cfg, providers...)
-}
-
-// NewServer - creates a server with default configurations and
-// the given grpc server.
-func NewServer(servers ...GrpcServer) (*Server, error) {
-	return NewWithCfg(Cfg, servers...)
-}
-
-func NewWithProvider(providers ...func() (GrpcServer, error)) (*Server, error) {
-	return NewWithCfgAndProvider(Cfg, providers...)
+	return server, nil
 }
