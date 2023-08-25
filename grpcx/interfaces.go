@@ -21,7 +21,7 @@ import (
 // GrpcServer - a grpc server implementation which implement this interface to
 // register itself to grpc.Server.
 type GrpcServer interface {
-	RegisterRpc(s *grpc.Server) error
+	RegisterRpc(s *grpc.Server)
 }
 
 // BeforeStartHook
