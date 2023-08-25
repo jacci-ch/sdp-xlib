@@ -173,23 +173,10 @@ func (s *Server) execBeforeStopHook() {
 }
 
 // NewServer - creates a grpc server with given options.
-func NewServer(opts ...OptionFunc) (*Server, error) {
-	if opts == nil || len(opts) == 0 {
-		err := errors.New("grpcx: no options to create grpcx server")
-		return nil, logx.FatalErr(err)
-	}
-
+func NewServer(opts ...OptionFunc) *Server {
 	server := &Server{realServer: grpc.NewServer()}
 	for _, apply := range opts {
-		if apply == nil {
-			err := errors.New("grpcx: argument option can't be nil")
-			return nil, logx.FatalErr(err)
-		}
-
-		if err := apply(server); err != nil {
-			logx.Fatal(err)
-			return nil, err
-		}
+		apply(server)
 	}
 
 	if server.cfg == nil {
@@ -197,5 +184,5 @@ func NewServer(opts ...OptionFunc) (*Server, error) {
 		server.cfg = gCfg
 	}
 
-	return server, nil
+	return server
 }

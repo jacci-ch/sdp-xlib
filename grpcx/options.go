@@ -15,75 +15,41 @@
 package grpcx
 
 import (
-	"errors"
-
 	"github.com/jacci-ch/sdp-xlib/logx"
 )
 
-type OptionFunc func(s *Server) error
-type Provider func() (GrpcServer, error)
+type OptionFunc func(s *Server)
+type Provider func() GrpcServer
 
 func OptKeys(keys *ConfigKeys) OptionFunc {
-	return func(s *Server) error {
+	return func(s *Server) {
 		if cfg, err := loadConfigs(keys); err != nil {
 			logx.Fatal(err)
-			return err
 		} else {
-			logx.Info("grpcx: use configuration loaded with given keys")
 			s.cfg = cfg
-			return nil
 		}
 	}
 }
 
 func OptCfg(cfg *Config) OptionFunc {
-	return func(s *Server) error {
-		if cfg == nil {
-			err := errors.New("grpcx: argument cfg can't be nil")
-			return logx.FatalErr(err)
-		}
-
-		logx.Info("grpcx: use specified configuration")
+	return func(s *Server) {
 		s.cfg = cfg
-		return nil
 	}
 }
 
 func OptServer(servers ...GrpcServer) OptionFunc {
-	return func(s *Server) error {
-		if servers == nil || len(servers) == 0 {
-			err := errors.New("grpcx: no rpc service provided")
-			return logx.FatalErr(err)
-		}
-
+	return func(s *Server) {
 		s.servers = servers
-		return nil
 	}
 }
 
 func OptProvider(providers ...Provider) OptionFunc {
-	return func(s *Server) error {
-		if providers == nil || len(providers) == 0 {
-			err := errors.New("grpcx: no rpc server providers specified")
-			return logx.FatalErr(err)
-		}
-
+	return func(s *Server) {
 		var servers []GrpcServer
-		for _, provider := range providers {
-			if provider == nil {
-				err := errors.New("grpcx: server provider can't be nil")
-				return logx.FatalErr(err)
-			}
-
-			if server, err := provider(); err != nil {
-				logx.Fatal(err)
-				return err
-			} else {
-				servers = append(servers, server)
-			}
+		for _, create := range providers {
+			servers = append(servers, create())
 		}
 
 		s.servers = servers
-		return nil
 	}
 }
