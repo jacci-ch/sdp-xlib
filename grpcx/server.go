@@ -173,7 +173,7 @@ func (s *Server) execBeforeStopHook() {
 }
 
 // NewServer - creates a grpc server with given options.
-func NewServer(opts ...Option) (*Server, error) {
+func NewServer(opts ...OptionFunc) (*Server, error) {
 	if opts == nil || len(opts) == 0 {
 		err := errors.New("grpcx: no options to create grpcx server")
 		return nil, logx.FatalErr(err)

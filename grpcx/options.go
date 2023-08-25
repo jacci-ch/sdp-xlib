@@ -20,10 +20,10 @@ import (
 	"github.com/jacci-ch/sdp-xlib/logx"
 )
 
-type Option func(s *Server) error
-type ServerProvider func() (GrpcServer, error)
+type OptionFunc func(s *Server) error
+type Provider func() (GrpcServer, error)
 
-func OptWithKeys(keys *ConfigKeys) Option {
+func OptKeys(keys *ConfigKeys) OptionFunc {
 	return func(s *Server) error {
 		if cfg, err := loadConfigs(keys); err != nil {
 			logx.Fatal(err)
@@ -36,7 +36,7 @@ func OptWithKeys(keys *ConfigKeys) Option {
 	}
 }
 
-func OptWithCfg(cfg *Config) Option {
+func OptCfg(cfg *Config) OptionFunc {
 	return func(s *Server) error {
 		if cfg == nil {
 			err := errors.New("grpcx: argument cfg can't be nil")
@@ -49,7 +49,7 @@ func OptWithCfg(cfg *Config) Option {
 	}
 }
 
-func OptWithServer(servers ...GrpcServer) Option {
+func OptServer(servers ...GrpcServer) OptionFunc {
 	return func(s *Server) error {
 		if servers == nil || len(servers) == 0 {
 			err := errors.New("grpcx: no rpc service provided")
@@ -61,7 +61,7 @@ func OptWithServer(servers ...GrpcServer) Option {
 	}
 }
 
-func OptWithServerProvider(providers ...ServerProvider) Option {
+func OptProvider(providers ...Provider) OptionFunc {
 	return func(s *Server) error {
 		if providers == nil || len(providers) == 0 {
 			err := errors.New("grpcx: no rpc server providers specified")
