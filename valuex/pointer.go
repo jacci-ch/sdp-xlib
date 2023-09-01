@@ -27,3 +27,7 @@ func SetPtr[T any](dst **T, src *T) {
 func Ptr[T any](v T) *T {
 	return &v
 }
+
+func IsNil(v any) bool {
+	return v == nil
+}
