@@ -23,36 +23,28 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Pointer interface{}
+func isNil(val string) bool {
+	return len(val) == 0 || val == "null" || val == "{}"
+}
 
-func doGet[T Pointer](get func(ctx context.Context) (string, error)) (ret T, err error) {
+func doGet[T any](get func(ctx context.Context) (string, error)) (*T, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), Cfg.ReadTimeout)
 	defer cancel()
 
 	rsp, err := get(ctx)
-	if err == nil {
-		if len(rsp) == 0 || rsp == "null" || rsp == "{}" {
-			return ret, err
-		} else {
-			var v T
-			if err = jsonx.UnmarshalFromString(rsp, &v); err != nil {
-				return ret, err
-			} else {
-				return v, err
-			}
+	if err == nil && !isNil(rsp) {
+		var v T
+		if err = jsonx.UnmarshalFromString(rsp, &v); err == nil {
+			return &v, err
 		}
-	} else {
-		if err != redis.Nil {
-			logx.Error(err)
-		}
-
-		return ret, err
 	}
+
+	return nil, err
 }
 
 // Get - retrieves the value of given key stored in redis server.
 // This function call jsonx function to decode string values to given type.
-func Get[T Pointer](key string) (T, error) {
+func Get[T any](key string) (*T, error) {
 	return doGet[T](func(ctx context.Context) (string, error) {
 		return Client.Get(ctx, key).Result()
 	})
@@ -60,26 +52,27 @@ func Get[T Pointer](key string) (T, error) {
 
 // GetEx - retrieves the value stored in redis server and prolong the
 // TTL of the given key.
-func GetEx[T Pointer](key string, ttl time.Duration) (T, error) {
+func GetEx[T any](key string, ttl time.Duration) (*T, error) {
 	return doGet[T](func(ctx context.Context) (string, error) {
 		return Client.GetEx(ctx, key, ttl).Result()
 	})
 }
 
-func doGetWithProvider[T Pointer](key string, ttl time.Duration, get, provide Provider[T]) (ret T, err error) {
-	if ret, err = get(); err != redis.Nil {
-		return ret, err
+func doGetWithProvider[T any](key string, ttl time.Duration, get, provide Provider[T]) (*T, error) {
+	if val, err := get(); err != redis.Nil {
+		return val, err
 	}
 
-	if ret, err = provide(); err == nil {
-		if s, e := jsonx.MarshalToString(ret); e != nil {
+	val, err := provide()
+	if err == nil {
+		if s, e := jsonx.MarshalToString(val); e != nil {
 			logx.Error(e)
 		} else if e = Set(key, s, ttl); e != nil {
 			logx.Error(e)
 		}
 	}
 
-	return ret, err
+	return val, err
 }
 
 // GetWithProvider - retrieves value of given key as given type. If the given key is not existed,
@@ -87,8 +80,8 @@ func doGetWithProvider[T Pointer](key string, ttl time.Duration, get, provide Pr
 // and set the new generated data to cache storage with given TTL.
 //
 // This function will exit when the data provider returns an error.
-func GetWithProvider[T Pointer](key string, ttl time.Duration, provider Provider[T]) (T, error) {
-	return doGetWithProvider(key, ttl, func() (T, error) {
+func GetWithProvider[T any](key string, ttl time.Duration, provider Provider[T]) (*T, error) {
+	return doGetWithProvider(key, ttl, func() (*T, error) {
 		return Get[T](key)
 	}, provider)
 }
@@ -99,8 +92,8 @@ func GetWithProvider[T Pointer](key string, ttl time.Duration, provider Provider
 // with given TTL.
 //
 // This function will exit when the data provider returns an error.
-func GetExWithProvider[T Pointer](key string, ttl time.Duration, provider Provider[T]) (T, error) {
-	return doGetWithProvider(key, ttl, func() (T, error) {
+func GetExWithProvider[T any](key string, ttl time.Duration, provider Provider[T]) (*T, error) {
+	return doGetWithProvider(key, ttl, func() (*T, error) {
 		return GetEx[T](key, ttl)
 	}, provider)
 }
@@ -109,4 +102,4 @@ func GetExWithProvider[T Pointer](key string, ttl time.Duration, provider Provid
 // When we call GetWithProvider() functions we need to specify a
 // provider function to generate data while the cached value
 // is not found.
-type Provider[T Pointer] func() (T, error)
+type Provider[T any] func() (*T, error)

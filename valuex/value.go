@@ -16,23 +16,21 @@ package valuex
 
 import (
 	"reflect"
-	"sync/atomic"
-	"unsafe"
+
+	"github.com/jacci-ch/sdp-xlib/logx"
 )
 
-// SetPtr - atomically writes a pointer value to another address.
-func SetPtr[T any](dst **T, src *T) {
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(dst)), unsafe.Pointer(src))
-}
+func SetField(dst any, name string, v2 any) {
+	rVal := reflect.Indirect(reflect.ValueOf(dst))
+	rField := rVal.FieldByName(name)
 
-func Ptr[T any](v T) *T {
-	return &v
-}
-
-func IsNil(v any) bool {
-	return reflect.ValueOf(v).IsNil()
-}
-
-func NotNil(v any) bool {
-	return !IsNil(v)
+	if rField.IsValid() && rField.Type().String() == reflect.TypeOf(v2).String() {
+		if rField.CanSet() {
+			rField.Set(reflect.ValueOf(v2))
+		} else {
+			logx.Warnf("field %v can't be set", name)
+		}
+	} else {
+		logx.Warnf("filed %v is invalid or type miss-matched")
+	}
 }
