@@ -32,4 +32,6 @@ func SetField(dst any, name string, v2 any) error {
 	} else {
 		return fmt.Errorf("filed %v is invalid or type miss-matched", name)
 	}
+
+	return nil
 }
