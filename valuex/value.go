@@ -15,12 +15,11 @@
 package valuex
 
 import (
+	"fmt"
 	"reflect"
-
-	"github.com/jacci-ch/sdp-xlib/logx"
 )
 
-func SetField(dst any, name string, v2 any) {
+func SetField(dst any, name string, v2 any) error {
 	rVal := reflect.Indirect(reflect.ValueOf(dst))
 	rField := rVal.FieldByName(name)
 
@@ -28,9 +27,9 @@ func SetField(dst any, name string, v2 any) {
 		if rField.CanSet() {
 			rField.Set(reflect.ValueOf(v2))
 		} else {
-			logx.Warnf("field %v can't be set", name)
+			return fmt.Errorf("field %v can't be set", name)
 		}
 	} else {
-		logx.Warnf("filed %v is invalid or type miss-matched")
+		return fmt.Errorf("filed %v is invalid or type miss-matched", name)
 	}
 }
