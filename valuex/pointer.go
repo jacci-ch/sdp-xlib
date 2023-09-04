@@ -29,10 +29,11 @@ func Ptr[T any](v T) *T {
 	return &v
 }
 
-func IsNil(v any) bool {
-	return reflect.ValueOf(v).IsNil()
+func NotNil(v any) bool {
+	rv := reflect.ValueOf(v)
+	return rv.IsValid() && !rv.IsNil()
 }
 
-func NotNil(v any) bool {
-	return !IsNil(v)
+func IsNil(v any) bool {
+	return NotNil(v)
 }
