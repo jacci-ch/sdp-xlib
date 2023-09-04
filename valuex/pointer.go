@@ -35,5 +35,5 @@ func NotNil(v any) bool {
 }
 
 func IsNil(v any) bool {
-	return NotNil(v)
+	return !NotNil(v)
 }
